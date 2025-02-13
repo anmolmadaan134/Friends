@@ -1,6 +1,4 @@
-const express = require("express")
 
-const app = express()
 
 // app.get("/user",(req,res)=>{
 //     res.send({firstname:"Anmol",lastname:"Madaan"})
@@ -59,19 +57,57 @@ const app = express()
 // },
 // )
 
-const {adminAuth} = require("./middlewares/auth")
+// const {adminAuth} = require("./middlewares/auth")
 
-app.use("/admin",adminAuth)
+// app.use("/admin",adminAuth)
 
-app.get("/admin/getAllData",(req,res)=>{
-    res.send("All Data sent")
-})
+// app.get("/admin/getAllData",(req,res)=>{
+//     res.send("All Data sent")
+// })
 
-app.get("/admin/deleteUser",(req,res)=>{
-    res.send("User deleted")
-})
+// app.get("/admin/deleteUser",(req,res)=>{
+//     res.send("User deleted")
+// })
 
-app.listen(3001,(req,res)=>{
-    console.log("Successfully running on port 3001");
+const express = require("express")
+const connectDB = require("./config/database")
+const User = require("./models/user")
+const app = express()
+
+app.use(express.json())
+
+app.post("/signup",async(req,res)=>{
+
+    //console.log(req.body);
     
+    // const userObj = {
+    //     firstName:"Tarun",
+    //     lastName:"Kohli",
+    //     emailId:"virat@gmail.com",
+    //     password:"virat123",
+    // }
+    // // Creating a new instance of the User Model
+    const user = new User(req.body)
+
+    try{await user.save();
+    res.send("User Added successfully")}
+    catch(err){
+        res.status(400).send("Error saving the user:" + err.message)
+    }
 })
+
+connectDB().then(()=>{
+    console.log("Database connection established...");
+    app.listen(3001,(req,res)=>{
+        console.log("Successfully running on port 3001");
+        
+    })
+}).catch(err=>{
+    console.error("Database cannot be connected")
+})
+
+
+
+
+
+
