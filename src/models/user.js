@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator')
 
 const userSchema =new mongoose.Schema({
     firstName:{
@@ -15,11 +16,21 @@ const userSchema =new mongoose.Schema({
         required:true,
         lowercase:true,
         unique:true,
-        trim:true
+        trim:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid email address")
+            }
+        }
     },
     password:{
         type:String,
         required:true,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Enter a Strong Password " + value)
+            }
+        }
     },
     age:{
        type:Number,
@@ -35,7 +46,12 @@ const userSchema =new mongoose.Schema({
     },
     photoUrl:{
         type:String,
-        default:"https://kristalle.com/wp-content/uploads/2020/07/dummy-profile-pic-1.jpg"
+        default:"https://kristalle.com/wp-content/uploads/2020/07/dummy-profile-pic-1.jpg",
+        validate(value){
+            if(!validator.isURL(value)){
+                throw new Error("Invalid photo url: " + value)
+            }
+        }
     },
     about:{
         type:String,
