@@ -75,8 +75,13 @@ const User = require("./models/user")
 const app = express()
 const {validateSignUpData} = require("./utils/validation")
 const bcrypt = require('bcrypt')
+const cookieParser = require("cookie-parser")
+const jwt = require('jsonwebtoken');
+const {userAuth} = require('./middlewares/auth')
+
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.post("/signup",async(req,res)=>{
 
@@ -117,6 +122,17 @@ app.post("/login",async(req,res)=>{
         const isPasswordValid = await bcrypt.compare(password,user.password)
 
         if(isPasswordValid){
+
+            // Create a JWT token
+
+            const token = await jwt.sign({_id:user._id}, "DEV@Friends#0219",{expiresIn:"0d"})
+            console.log(token);
+            
+
+
+            res.cookie("token",token,{
+                expires: new Date(Date.now() + 8 *3600000)
+            }) 
             res.send("login successfully")
         }else{
             throw new Error("Password is not correct")
@@ -126,6 +142,30 @@ app.post("/login",async(req,res)=>{
     catch(err){
         res.status(400).send("Something went wrong" + err.message)
     }
+})
+
+app.get("/profile",userAuth,async(req,res)=>{
+
+    try{
+
+    
+    
+    const user = req.user
+
+    
+    res.send(user)
+}
+    catch(err){
+        res.status(400).send("Something went wrong" + err.message)
+    }
+    
+})
+
+app.post("/sendConnectionRequest" , userAuth, (req,res,next)=>{
+    const user = req.user;
+
+    res.send(user.firstName + " sent the connection request")
+
 })
 
 //Get user by email
